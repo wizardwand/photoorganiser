@@ -50,7 +50,7 @@ This gives others a chance to provide feedback before you spend your valuable ti
 
 ## Credits
 
-This app is developed by [Shirish Patil](https://github.com/wizardwand) Shirish Patil.
+This app is developed by [Shirish Patil](https://github.com/wizardwand).
 
 Thanks to for libarary [Drew Noakes](https://drewnoakes.com/code/exif/).
 
