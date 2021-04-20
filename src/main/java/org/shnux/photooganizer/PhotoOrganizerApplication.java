@@ -8,6 +8,7 @@ import com.drew.metadata.Tag;
 import com.sampullara.cli.Args;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -34,7 +35,7 @@ public class PhotoOrganizerApplication {
 
   //    public static final String SOURCE_PATH = "C:\\var\\all_photos\\2015 sorted\\002 Home Docs";
   public static final String SOURCE_PATH = "C:\\tmp\\test";
-  public static final char PATH_SEPARATOR = File.pathSeparatorChar;
+  public static final String PATH_SEPARATOR = File.separator;
   //  public static final String SOURCE_PATH = "D:\\bk";
 //  public static final String DESTINATION_PATH = "D:/02SortedFamilyPhotos";
   public static final Map<String, String> monthMap =
@@ -103,11 +104,11 @@ public class PhotoOrganizerApplication {
     // Populates the array with names of files and directories
     pathNames = f.list();
 
-    System.out.println("PATH_SEPARATOR = " + PATH_SEPARATOR);
+    LOG.info("PATH_SEPARATOR = " + PATH_SEPARATOR);
     // For each pathname in the pathNames array
     for (String fileName : pathNames) {
       // Print the names of files and directories
-      final String filePath = source + "\\" + fileName;
+      final String filePath = source + PATH_SEPARATOR + fileName;
       boolean isDirectory = new File(filePath).isDirectory();
       if (isDirectory) {
         readPhotos(filePath);
@@ -122,16 +123,16 @@ public class PhotoOrganizerApplication {
 
     if (fileName.startsWith("VID")) {
       final String yearMonth = getYearMonthFromFileName(fileName);
-      moveFileToDirectory(filePath, Options.destination + "\\" + yearMonth + "\\" + fileName);
+      moveFileToDirectory(filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
     } else {
       try {
         File file = new File(filePath);
         Metadata metadata = ImageMetadataReader.readMetadata(file);
         final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
-        moveFileToDirectory(filePath, Options.destination + "\\" + yearMonth + "\\" + fileName);
+        moveFileToDirectory(filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
         //        printAllMetadata(metadata, "Using JpegMetadataReader");
       } catch (ImageProcessingException | IOException e) {
-        LOG.info(" Error Processing file:: " + fileName);
+        LOG.error(" Error Processing file:: " + fileName);
         // e.printStackTrace();
       }
     }
@@ -163,10 +164,10 @@ public class PhotoOrganizerApplication {
 
       // rename or move a file to other path
       // if target exists, throws FileAlreadyExistsException
-      //      Files.move(source, target);
+            Files.move(source, target);
 
       // if target exists, replace it.
-      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+//      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
 
       // multiple CopyOption
       /*CopyOption[] options = { StandardCopyOption.REPLACE_EXISTING,
@@ -176,7 +177,8 @@ public class PhotoOrganizerApplication {
       Files.move(source, target, options);*/
 
     } catch (IOException e) {
-      e.printStackTrace();
+      // e.printStackTrace();
+      LOG.error("Already exists in Destination {}",target);
     }
   }
 
@@ -190,7 +192,7 @@ public class PhotoOrganizerApplication {
       }
       // java.nio.file.Files;
     } catch (Exception e) {
-      LOG.info("e = " + e);
+      LOG.error("e = " + e);
     }
   }
 
@@ -227,7 +229,7 @@ public class PhotoOrganizerApplication {
       // Each Directory may also contain error messages
       //
       for (String error : directory.getErrors()) {
-        System.err.println("ERROR: " + error);
+        LOG.error("ERROR: " + error);
       }
     }
     return DONT_KNOW;
@@ -310,7 +312,7 @@ public class PhotoOrganizerApplication {
 
         } catch (IOException e) {
 
-          System.err.println("Failed to create directory!" + e.getMessage());
+          LOG.error("Failed to create directory!" + e.getMessage());
         }
       }
     }
@@ -339,7 +341,7 @@ public class PhotoOrganizerApplication {
       // Each Directory may also contain error messages
       //
       for (String error : directory.getErrors()) {
-        System.err.println("ERROR: " + error);
+        LOG.error("ERROR: " + error);
       }
     }
   }
