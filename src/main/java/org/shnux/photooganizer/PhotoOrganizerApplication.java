@@ -5,6 +5,7 @@ import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
+import com.sampullara.cli.Args;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,57 +20,56 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-/**
- * Created by Shirish on 4/17/2021 for learning
- */
-@SpringBootApplication
+/** Created by Shirish on 4/17/2021 for learning */
 public class PhotoOrganizerApplication {
 
-  //  public static final String SOURCE_PATH = "C:\\var\\all_photos\\2015 sorted\\002 Home Docs";
-  //  public static final String SOURCE_PATH = "C:\\var\\all_photos\\1";
-  public static final String SOURCE_PATH = "D:\\bk";
-  public static final String DESTINATION_PATH = "D:/02SortedFamilyPhotos";
+  //    public static final String SOURCE_PATH = "C:\\var\\all_photos\\2015 sorted\\002 Home Docs";
+  public static final String SOURCE_PATH = "C:\\tmp\\test";
+  public static final char PATH_SEPARATOR = File.pathSeparatorChar;
+  //  public static final String SOURCE_PATH = "D:\\bk";
+//  public static final String DESTINATION_PATH = "D:/02SortedFamilyPhotos";
   public static final Map<String, String> monthMap =
       Stream.of(
-          new String[][]{
-              {"Jan", "_01_Jan"},
-              {"Feb", "_02_Feb"},
-              {"Mar", "_03_Mar"},
-              {"Apr", "_04_Apr"},
-              {"May", "_05_May"},
-              {"Jun", "_06_Jun"},
-              {"Jul", "_07_Jul"},
-              {"Aug", "_08_Aug"},
-              {"Sep", "_09_Sep"},
-              {"Oct", "_10_Oct"},
-              {"Nov", "_11_Nov"},
-              {"Dec", "_12_Dec"}
-          })
+              new String[][] {
+                {"Jan", "_01_Jan"},
+                {"Feb", "_02_Feb"},
+                {"Mar", "_03_Mar"},
+                {"Apr", "_04_Apr"},
+                {"May", "_05_May"},
+                {"Jun", "_06_Jun"},
+                {"Jul", "_07_Jul"},
+                {"Aug", "_08_Aug"},
+                {"Sep", "_09_Sep"},
+                {"Oct", "_10_Oct"},
+                {"Nov", "_11_Nov"},
+                {"Dec", "_12_Dec"}
+              })
           .collect(Collectors.toMap(data -> data[0], data -> data[1]));
   public static final Map<String, String> intMonthMap =
       Stream.of(
-          new String[][]{
-              {"01", "_01_Jan"},
-              {"02", "_02_Feb"},
-              {"03", "_03_Mar"},
-              {"04", "_04_Apr"},
-              {"05", "_05_May"},
-              {"06", "_06_Jun"},
-              {"07", "_07_Jul"},
-              {"08", "_08_Aug"},
-              {"09", "_09_Sep"},
-              {"10", "_10_Oct"},
-              {"11", "_11_Nov"},
-              {"12", "_12_Dec"}
-          })
+              new String[][] {
+                {"01", "_01_Jan"},
+                {"02", "_02_Feb"},
+                {"03", "_03_Mar"},
+                {"04", "_04_Apr"},
+                {"05", "_05_May"},
+                {"06", "_06_Jun"},
+                {"07", "_07_Jul"},
+                {"08", "_08_Aug"},
+                {"09", "_09_Sep"},
+                {"10", "_10_Oct"},
+                {"11", "_11_Nov"},
+                {"12", "_12_Dec"}
+              })
           .collect(Collectors.toMap(data -> data[0], data -> data[1]));
   public static final String DONT_KNOW = "dont_know";
   private static final Logger LOG = LogManager.getLogger(PhotoOrganizerApplication.class);
@@ -83,10 +83,12 @@ public class PhotoOrganizerApplication {
    * <p>Special Occasions ::: YYYY_$01_MONTH_DATE_SPECIAL_OCCASIONS
    */
   public static void main(String[] args) {
-    // path
-    //                createFolders();
-    // read photos
-    readPhotos(SOURCE_PATH);
+    List<String> unparsed = Args.parseOrExit(Options.class, args);
+    if (Objects.nonNull(Options.source) && Objects.nonNull(Options.destination)) {
+      readPhotos(Options.source);
+    } else {
+      LOG.info("Please provide source and destination");
+    }
   }
 
   public static void readPhotos(String source) {
@@ -101,6 +103,7 @@ public class PhotoOrganizerApplication {
     // Populates the array with names of files and directories
     pathNames = f.list();
 
+    System.out.println("PATH_SEPARATOR = " + PATH_SEPARATOR);
     // For each pathname in the pathNames array
     for (String fileName : pathNames) {
       // Print the names of files and directories
@@ -119,15 +122,14 @@ public class PhotoOrganizerApplication {
 
     if (fileName.startsWith("VID")) {
       final String yearMonth = getYearMonthFromFileName(fileName);
-      moveFileToDirectory(filePath, DESTINATION_PATH + "\\" + yearMonth + "\\" + fileName);
+      moveFileToDirectory(filePath, Options.destination + "\\" + yearMonth + "\\" + fileName);
     } else {
       try {
         File file = new File(filePath);
         Metadata metadata = ImageMetadataReader.readMetadata(file);
         final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
-        moveFileToDirectory(filePath, DESTINATION_PATH + "\\" + yearMonth + "\\" +
-            fileName);
-//        printAllMetadata(metadata, "Using JpegMetadataReader");
+        moveFileToDirectory(filePath, Options.destination + "\\" + yearMonth + "\\" + fileName);
+        //        printAllMetadata(metadata, "Using JpegMetadataReader");
       } catch (ImageProcessingException | IOException e) {
         LOG.info(" Error Processing file:: " + fileName);
         // e.printStackTrace();
@@ -192,9 +194,7 @@ public class PhotoOrganizerApplication {
     }
   }
 
-  /**
-   * Write all extracted values to stdout.
-   */
+  /** Write all extracted values to stdout. */
   private static String traverseMetadata(Metadata metadata, String method) {
     //
     // A Metadata object contains multiple Directory objects
@@ -285,7 +285,7 @@ public class PhotoOrganizerApplication {
    * folder , it will just create the new once which are not present
    */
   public static void createFolders() {
-    String pathString = DESTINATION_PATH;
+    String pathString = Options.destination;
     LOG.info("path = " + pathString);
     // start year
     int startYear = 2008;
@@ -316,9 +316,7 @@ public class PhotoOrganizerApplication {
     }
   }
 
-  /**
-   * Write all extracted values to stdout.
-   */
+  /** Write all extracted values to stdout. */
   private static void printAllMetadata(Metadata metadata, String method) {
     LOG.info("-------------------------------------------------");
     System.out.print(' ');
