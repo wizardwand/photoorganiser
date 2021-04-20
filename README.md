@@ -1,4 +1,5 @@
 - [Photo Organiser](#photo-organiser)
+- [How to execute](#how-to-execute)
 - [Problem Statement](#problem-statement)
 - [Solution](#solution)
   - [Questions & Feedback](#questions--feedback)
@@ -10,6 +11,23 @@
 This project will organize all the photos and videos that you have in Following Format YYYY_$MonthNumber_MONTH
 
 ![text](./images/Output.JPG)
+
+# How to execute
+
+If you have java 8 and above setup on your machine following command will work.
+
+```
+cd /execute/
+java -jar photo-organizer.jar -s "C:\tmp\test" -d "C:\tmp\photos"
+
+-s is the source folder
+-d is the destination folder where all the photos and videos will be moved .
+Log will be generated in C:\tmp\PhotoOrganizer folder.
+```
+
+If Java 8 is not installed.
+
+[How to setup Java](https://www.google.com/search?q=how+to+install+java+8+and+setup+environment+variables&rlz=1C1CHBD_en&oq=how+to+install+java+8+and+setup+environment+variables+&aqs=chrome..69i57j33i22i29i30l4.24527j0j7&sourceid=chrome&ie=UTF-8)
 
 # Problem Statement
 
