@@ -100,15 +100,17 @@ public class PhotoOrganizerApplication {
 
     LOG.info("PATH_SEPARATOR = {}", PATH_SEPARATOR);
     // For each pathname in the pathNames array
-    for (String fileName : pathNames) {
-      // Print the names of files and directories
-      final String filePath = source + PATH_SEPARATOR + fileName;
-      boolean isDirectory = new File(filePath).isDirectory();
-      if (isDirectory) {
-        readPhotos(filePath);
-      } else {
-                moveFilesInThisPath(fileName, filePath);
+    if (pathNames != null) {
+      for (String fileName : pathNames) {
+        // Print the names of files and directories
+        final String filePath = source + PATH_SEPARATOR + fileName;
+        boolean isDirectory = new File(filePath).isDirectory();
+        if (isDirectory) {
+          readPhotos(filePath);
+        } else {
+          moveFilesInThisPath(fileName, filePath);
 //        printFilesInThisPath(fileName, filePath);
+        }
       }
     }
   }
