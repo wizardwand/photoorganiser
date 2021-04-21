@@ -8,12 +8,10 @@ import com.drew.metadata.Tag;
 import com.sampullara.cli.Args;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileTime;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -22,6 +20,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -33,12 +32,8 @@ import org.apache.logging.log4j.Logger;
 /** Created by Shirish on 4/17/2021 for learning */
 public class PhotoOrganizerApplication {
 
-  //    public static final String SOURCE_PATH = "C:\\var\\all_photos\\2015 sorted\\002 Home Docs";
-  public static final String SOURCE_PATH = "C:\\tmp\\test";
   public static final String PATH_SEPARATOR = File.separator;
-  //  public static final String SOURCE_PATH = "D:\\bk";
-//  public static final String DESTINATION_PATH = "D:/02SortedFamilyPhotos";
-  public static final Map<String, String> monthMap =
+  protected static final Map<String, String> monthMap =
       Stream.of(
               new String[][] {
                 {"Jan", "_01_Jan"},
@@ -55,7 +50,7 @@ public class PhotoOrganizerApplication {
                 {"Dec", "_12_Dec"}
               })
           .collect(Collectors.toMap(data -> data[0], data -> data[1]));
-  public static final Map<String, String> intMonthMap =
+  protected static final Map<String, String> intMonthMap =
       Stream.of(
               new String[][] {
                 {"01", "_01_Jan"},
@@ -84,7 +79,7 @@ public class PhotoOrganizerApplication {
    * <p>Special Occasions ::: YYYY_$01_MONTH_DATE_SPECIAL_OCCASIONS
    */
   public static void main(String[] args) {
-    List<String> unparsed = Args.parseOrExit(Options.class, args);
+
     if (Objects.nonNull(Options.source) && Objects.nonNull(Options.destination)) {
       readPhotos(Options.source);
     } else {
@@ -104,7 +99,7 @@ public class PhotoOrganizerApplication {
     // Populates the array with names of files and directories
     pathNames = f.list();
 
-    LOG.info("PATH_SEPARATOR = " + PATH_SEPARATOR);
+    LOG.info("PATH_SEPARATOR = {}", PATH_SEPARATOR);
     // For each pathname in the pathNames array
     for (String fileName : pathNames) {
       // Print the names of files and directories
@@ -113,7 +108,8 @@ public class PhotoOrganizerApplication {
       if (isDirectory) {
         readPhotos(filePath);
       } else {
-        moveFilesInThisPath(fileName, filePath);
+        //        moveFilesInThisPath(fileName, filePath);
+        printFilesInThisPath(fileName, filePath);
       }
     }
   }
@@ -123,16 +119,18 @@ public class PhotoOrganizerApplication {
 
     if (fileName.startsWith("VID")) {
       final String yearMonth = getYearMonthFromFileName(fileName);
-      moveFileToDirectory(filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
+      moveFileToDirectory(
+          filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
     } else {
       try {
         File file = new File(filePath);
         Metadata metadata = ImageMetadataReader.readMetadata(file);
         final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
-        moveFileToDirectory(filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
+        moveFileToDirectory(
+            filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
         //        printAllMetadata(metadata, "Using JpegMetadataReader");
       } catch (ImageProcessingException | IOException e) {
-        LOG.error(" Error Processing file:: " + fileName);
+        LOG.error(" Error Processing file:: {}" , fileName);
         // e.printStackTrace();
       }
     }
@@ -164,10 +162,10 @@ public class PhotoOrganizerApplication {
 
       // rename or move a file to other path
       // if target exists, throws FileAlreadyExistsException
-            Files.move(source, target);
+      Files.move(source, target);
 
       // if target exists, replace it.
-//      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+      //      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
 
       // multiple CopyOption
       /*CopyOption[] options = { StandardCopyOption.REPLACE_EXISTING,
@@ -178,21 +176,7 @@ public class PhotoOrganizerApplication {
 
     } catch (IOException e) {
       // e.printStackTrace();
-      LOG.error("Already exists in Destination {}",target);
-    }
-  }
-
-  public static void createFolderIfNotPresent(String toFile) {
-    File newFolder = new File(toFile).getParentFile();
-    try {
-      Path path = Paths.get(newFolder.getPath());
-      if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
-        Files.createDirectories(path);
-        return;
-      }
-      // java.nio.file.Files;
-    } catch (Exception e) {
-      LOG.error("e = " + e);
+      LOG.error("Already exists in Destination {}", target);
     }
   }
 
@@ -218,6 +202,11 @@ public class PhotoOrganizerApplication {
           return formatStringDate(tag.getDescription());
         }
 
+        if (tag.getDirectoryName().contains("Video")
+            && "Creation Time".equalsIgnoreCase(tag.getTagName())) {
+          formatStringDateLong(tag.getDescription());
+        }
+
         //        if ("MP4 Video".equalsIgnoreCase(tag.getDirectoryName())
         //        && "Creation Time".equalsIgnoreCase(tag.getTagName())){
         ////          return formatStringDateLong(tag.getDescription());
@@ -233,6 +222,20 @@ public class PhotoOrganizerApplication {
       }
     }
     return DONT_KNOW;
+  }
+
+  public static void createFolderIfNotPresent(String toFile) {
+    File newFolder = new File(toFile).getParentFile();
+    try {
+      Path path = Paths.get(newFolder.getPath());
+      if (!Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+        Files.createDirectories(path);
+        return;
+      }
+      // java.nio.file.Files;
+    } catch (Exception e) {
+      LOG.error("e = " + e);
+    }
   }
 
   private static String formatStringDate(String dateString) {
@@ -254,32 +257,42 @@ public class PhotoOrganizerApplication {
     }
   }
 
+  private static String formatStringDateLong(String dateString) {
+    SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy"), monthFormat = new SimpleDateFormat("MMM");
+
+    try {
+//      String time = "Fri Sep 15 13:27:54 +05:30 2017";
+      DateFormat inputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss XXX yyyy", Locale.ROOT);
+      Date date = inputFormat.parse(dateString);
+      System.out.println(date);
+      String yearMonth = yearFormat.format(date) + monthMap.get(monthFormat.format(date));
+      LOG.info("yearMonth = " + yearMonth);
+      return yearFormat.format(date) + monthMap.get(monthFormat.format(date));
+    } catch (Exception e) {
+
+    }
+    return null;
+  }
+
+  private static void printFilesInThisPath(String fileName, String filePath) {
+    LOG.info("fileName = " + filePath);
+
+    try {
+      File file = new File(filePath);
+      Metadata metadata = ImageMetadataReader.readMetadata(file);
+      final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
+      printAllMetadata(metadata, "Using JpegMetadataReader");
+    } catch (ImageProcessingException | IOException e) {
+      LOG.error(" Error Processing file:: " + fileName);
+    }
+  }
+
   public static String formatDateTime(FileTime fileTime) {
 
     LocalDateTime localDateTime =
         fileTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
     return localDateTime.format(DATE_FORMATTER);
-  }
-
-  private static String formatStringDateLong(String dateString) {
-    String myYearFormat = "yyyy";
-    String myMonthFormat = "MMM";
-    String yearString = "", monthString = "";
-
-    try {
-      DateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
-      Date date = formatter.parse(dateString);
-      SimpleDateFormat yearFormat = new SimpleDateFormat(myYearFormat);
-      yearString = yearFormat.format(date);
-      SimpleDateFormat monthFormat = new SimpleDateFormat(myMonthFormat);
-      monthString = monthFormat.format(date);
-      LOG.info("monthString = " + yearString + monthMap.get(monthString));
-      return yearString + monthMap.get(monthString);
-    } catch (Exception e) {
-
-    }
-    return null;
   }
 
   /**
