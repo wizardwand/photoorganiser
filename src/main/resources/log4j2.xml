@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration status="WARN" monitorInterval="30">
+<Configuration status="error" monitorInterval="30">
     <Properties>
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p %m%n</Property>
         <Property name="APP_LOG_ROOT">c:/tmp</Property>
@@ -22,8 +22,8 @@
     </Appenders>
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="console" />
-            <AppenderRef ref="file" />
+            <AppenderRef ref="console" level="error" />
+            <AppenderRef ref="file" level="error"/>
         </Root>
     </Loggers>
 </Configuration>
