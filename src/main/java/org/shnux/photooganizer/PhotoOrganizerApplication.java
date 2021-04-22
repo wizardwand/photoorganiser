@@ -12,16 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.FileTime;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,8 +102,10 @@ public class PhotoOrganizerApplication {
         final String filePath = source + PATH_SEPARATOR + fileName;
         boolean isDirectory = new File(filePath).isDirectory();
         if (isDirectory) {
+          System.out.print(".");
           readPhotos(filePath);
         } else {
+          System.out.print("+");
           moveFilesInThisPath(fileName, filePath);
 //        printFilesInThisPath(fileName, filePath);
         }
@@ -121,34 +119,17 @@ public class PhotoOrganizerApplication {
     try {
       File file = new File(filePath);
       Metadata metadata = ImageMetadataReader.readMetadata(file);
-      final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
-      LOG.info("Destination = {}" , Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
+      final String yearMonth = traverseMetadata(metadata);
+      LOG.info(
+          "Destination = {}",
+          Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
       moveFileToDirectory(
           filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
-      //        printAllMetadata(metadata, "Using JpegMetadataReader");
     } catch (ImageProcessingException | IOException e) {
       LOG.error(" Error Processing file:: {}", fileName);
+    } catch ( Exception e){
+      LOG.error("Generic Error Processing file:: {}", fileName);
     }
-  }
-
-  /** Write all extracted values to stdout. */
-  private static String traverseMetadata(Metadata metadata, String method) {
-    //
-    // A Metadata object contains multiple Directory objects
-    //
-    for (Directory directory : metadata.getDirectories()) {
-
-      //
-      // Each Directory stores values in Tag objects
-      //
-      for (Tag tag : directory.getTags()) {
-
-        if ("File Modified Date".equalsIgnoreCase(tag.getTagName())) {
-          return formatStringDateLong(tag.getDescription());
-        }
-      }
-    }
-    return DONT_KNOW;
   }
 
   public static void moveFileToDirectory(String fromFile, String toFile) {
@@ -175,26 +156,8 @@ public class PhotoOrganizerApplication {
       Files.move(source, target, options);*/
 
     } catch (IOException e) {
-      // e.printStackTrace();
       LOG.error("Already exists in Destination {}", target);
     }
-  }
-
-  private static String formatStringDateLong(String dateString) {
-    SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy"),
-        monthFormat = new SimpleDateFormat("MMM");
-
-    try {
-      //      String time = "Fri Sep 15 13:27:54 +05:30 2017";
-      DateFormat inputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss XXX yyyy", Locale.ROOT);
-      Date date = inputFormat.parse(dateString);
-      String yearMonth = yearFormat.format(date) + monthMap.get(monthFormat.format(date));
-      LOG.info("yearMonth = " + yearMonth);
-      return yearFormat.format(date) + monthMap.get(monthFormat.format(date));
-    } catch (Exception e) {
-      LOG.error("Modified Date error date {}", dateString);
-    }
-    return null;
   }
 
   public static void createFolderIfNotPresent(String toFile) {
@@ -205,107 +168,48 @@ public class PhotoOrganizerApplication {
         Files.createDirectories(path);
         return;
       }
-      // java.nio.file.Files;
     } catch (Exception e) {
-      LOG.error("e = " + e);
-    }
-  }
-
-  private static String getYearMonthFromFileName(String fileName) {
-    try {
-      String year = fileName.substring(4, 8);
-      LOG.info("year = {}", year);
-      String month = fileName.substring(8, 10);
-      LOG.info("month = {}", monthMap.get(month));
-      LOG.info("year + month = {}", year + intMonthMap.get(month));
-      return year + intMonthMap.get(month);
-    } catch (NumberFormatException e) {
-      LOG.info("not an year");
-    }
-    return DONT_KNOW;
-  }
-
-  private static String formatStringDate(String dateString) {
-    String myYearFormat = "yyyy";
-    String myMonthFormat = "MMM";
-    String yearString = "", monthString = "";
-
-    try {
-      DateFormat formatter = new SimpleDateFormat("yyyy:MM:dd hh:mm:ss");
-      Date date = formatter.parse(dateString);
-      SimpleDateFormat yearFormat = new SimpleDateFormat(myYearFormat);
-      yearString = yearFormat.format(date);
-      SimpleDateFormat monthFormat = new SimpleDateFormat(myMonthFormat);
-      monthString = monthFormat.format(date);
-      LOG.info("monthString = " + yearString + monthMap.get(monthString));
-      return yearString + monthMap.get(monthString);
-    } catch (Exception e) {
-      return DONT_KNOW;
+      LOG.error("e = {}", e.getMessage());
     }
   }
 
   private static void printFilesInThisPath(String fileName, String filePath) {
-    LOG.info("fileName = " + filePath);
+    LOG.info("fileName {} ", filePath);
 
     try {
       File file = new File(filePath);
       Metadata metadata = ImageMetadataReader.readMetadata(file);
-      final String yearMonth = traverseMetadata(metadata, "Using JpegMetadataReader");
-      printAllMetadata(metadata, "Using JpegMetadataReader");
+      final String yearMonth = traverseMetadata(metadata);
+      printAllMetadata(metadata);
     } catch (ImageProcessingException | IOException e) {
       LOG.error(" Error Processing file:: " + fileName);
     }
   }
 
-  public static String formatDateTime(FileTime fileTime) {
+  /** Write all extracted values to stdout. */
+  private static String traverseMetadata(Metadata metadata) {
+    //
+    // A Metadata object contains multiple Directory objects
+    //
+    for (Directory directory : metadata.getDirectories()) {
 
-    LocalDateTime localDateTime =
-        fileTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+      //
+      // Each Directory stores values in Tag objects
+      //
+      for (Tag tag : directory.getTags()) {
 
-    return localDateTime.format(DATE_FORMATTER);
-  }
-
-  /**
-   * Don't worry if the folder are present with same name , it will not delete the contents of
-   * folder , it will just create the new once which are not present
-   */
-  public static void createFolders() {
-    String pathString = Options.destination;
-    LOG.info("path = " + pathString);
-    // start year
-    int startYear = 2008;
-    LOG.info("startYear = " + startYear);
-    // end year
-    int endYear = 2021;
-    LOG.info("endYear = " + endYear);
-
-    for (int i = startYear; i < endYear; i++) {
-      for (Entry<String, String> ssEntry : monthMap.entrySet()) {
-        LOG.info("ssEntry = " + ssEntry);
-        final String folderName = i + ssEntry.getValue();
-        LOG.info("monthMap[j] = " + folderName);
-        try {
-
-          Path path = Paths.get(pathString + folderName);
-
-          // java.nio.file.Files;
-          Files.createDirectories(path);
-
-          LOG.info("Directory is created!");
-
-        } catch (IOException e) {
-
-          LOG.error("Failed to create directory!" + e.getMessage());
+        if ("File Modified Date".equalsIgnoreCase(tag.getTagName())) {
+          return formatStringDateLong(tag.getDescription());
         }
       }
     }
+    return DONT_KNOW;
   }
 
   /** Write all extracted values to stdout. */
-  private static void printAllMetadata(Metadata metadata, String method) {
+  private static void printAllMetadata(Metadata metadata) {
     LOG.info("-------------------------------------------------");
     System.out.print(' ');
-    System.out.print(method);
     LOG.info("-------------------------------------------------");
 
     //
@@ -327,6 +231,23 @@ public class PhotoOrganizerApplication {
         LOG.error("ERROR: {}", error);
       }
     }
+  }
+
+  private static String formatStringDateLong(String dateString) {
+    SimpleDateFormat yearFormat = new SimpleDateFormat("yyyy"),
+        monthFormat = new SimpleDateFormat("MMM");
+
+    try {
+      //      String time = "Fri Sep 15 13:27:54 +05:30 2017";
+      DateFormat inputFormat = new SimpleDateFormat("E MMM dd HH:mm:ss XXX yyyy", Locale.ROOT);
+      Date date = inputFormat.parse(dateString);
+      String yearMonth = yearFormat.format(date) + monthMap.get(monthFormat.format(date));
+      LOG.info("yearMonth {} ", yearMonth);
+      return yearFormat.format(date) + monthMap.get(monthFormat.format(date));
+    } catch (Exception e) {
+      LOG.error("Modified Date error date {}", dateString);
+    }
+    return null;
   }
 
   private static void print(Exception exception) {
