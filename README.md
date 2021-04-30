@@ -73,6 +73,6 @@ This gives others a chance to provide feedback before you spend your valuable ti
 
 This app is developed by [Shirish Patil](https://github.com/wizardwand).
 
-Thanks to for libarary [Drew Noakes](https://drewnoakes.com/code/exif/).
+Thanks to [Drew Noakes](https://drewnoakes.com/code/exif/) for libarary .
 
 Wherever possible, they have been credited in the source code and commit logs.
