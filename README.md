@@ -13,6 +13,7 @@ This project will organize all the photos and videos that you have in Following 
 ![text](./images/Output.JPG)
 
 I have actually been managed to sort 38,450 files using this
+
 ![Images](./images/ActualFolders.png)
 
 # How to execute
