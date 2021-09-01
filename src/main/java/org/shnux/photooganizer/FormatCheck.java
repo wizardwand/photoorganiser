@@ -10,13 +10,13 @@ public class FormatCheck {
                         return super.equals(obj);
                     }
 
-
-
-
-
-
                     @Override
     public int hashCode() {
         return super.hashCode();
     }
+
+            public static void aBetterFormatting(){
+    System.out.println( "in IDE " +
+                                    "this is not so cool ");
+            }
 }
