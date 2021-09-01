@@ -18,6 +18,17 @@ public class FormatCheck {
   public static void aBetterFormatting() {
     System.out.println("in IDE " + "this is not so cool ");
   }
-
+  /*******
+   *
+   *
+   *
+   *
+   *
+   *
+   **
+   *
+   *
+   ***
+   */
   public static void addingNewMethod() {}
 }
