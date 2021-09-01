@@ -22,10 +22,13 @@ public class FormatCheck {
    *
    *
    *
+   * This is not
+   *
+   *
+   * a  valid comment
    *
    *
    *
-   **
    *
    *
    ***
