@@ -8,6 +8,8 @@ public class FormatCheck {
   @Override
   public boolean equals(Object obj) {
     return super.equals(obj);
+
+    System.out.println("this is S0 cool ");
   }
 
   @Override
