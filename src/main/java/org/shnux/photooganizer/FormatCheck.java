@@ -11,6 +11,10 @@ public class FormatCheck {
                     }
 
 
+
+
+
+
                     @Override
     public int hashCode() {
         return super.hashCode();
