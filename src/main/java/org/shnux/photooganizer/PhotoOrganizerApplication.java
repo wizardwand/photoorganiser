@@ -107,7 +107,7 @@ public class PhotoOrganizerApplication {
         } else {
           System.out.print("+");
           moveFilesInThisPath(fileName, filePath);
-//        printFilesInThisPath(fileName, filePath);
+          //        printFilesInThisPath(fileName, filePath);
         }
       }
     }
@@ -127,7 +127,7 @@ public class PhotoOrganizerApplication {
           filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
     } catch (ImageProcessingException | IOException e) {
       LOG.error(" Error Processing file:: {}", fileName);
-    } catch ( Exception e){
+    } catch (Exception e) {
       LOG.error("Generic Error Processing file:: {}", fileName);
     }
   }
@@ -182,6 +182,7 @@ public class PhotoOrganizerApplication {
       final String yearMonth = traverseMetadata(metadata);
       printAllMetadata(metadata);
     } catch (ImageProcessingException | IOException e) {
+
       LOG.error(" Error Processing file:: " + fileName);
     }
   }
