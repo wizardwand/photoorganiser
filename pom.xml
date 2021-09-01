@@ -21,6 +21,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <git-code-format-maven-plugin.version>3.1</git-code-format-maven-plugin.version>
   </properties>
 
   <repositories>
@@ -64,6 +65,22 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+      <groupId>com.cosium.code</groupId>
+      <artifactId>git-code-format-maven-plugin</artifactId>
+      <version>${git-code-format-maven-plugin.version}</version>
+      <executions>
+        <!-- ... -->
+      </executions>
+      <configuration>
+        <googleJavaFormatOptions>
+          <aosp>false</aosp>
+          <fixImportsOnly>false</fixImportsOnly>
+          <skipSortingImports>false</skipSortingImports>
+          <skipRemovingUnusedImports>false</skipRemovingUnusedImports>
+        </googleJavaFormatOptions>
+      </configuration>
+    </plugin>
     </plugins>
   </build>
   <dependencies>
