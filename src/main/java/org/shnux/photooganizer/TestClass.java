@@ -9,7 +9,7 @@ public class TestClass {
   }
 
   public static Set<String> allPerm(String s) {
-                           Set<String> perm = new HashSet<>();
+    Set<String> perm = new HashSet<>();
     // Handling error scenarios
     if (s == null) {
       return null;
@@ -19,7 +19,7 @@ public class TestClass {
     }
     char init = s.charAt(0);
     String rem = s.substring(1);
-                       Set<String> words = allPerm(rem);
+    Set<String> words = allPerm(rem);
     for (String strNew : words) {
       for (int i = 0; i <= strNew.length(); i++) {
         perm.add(insertChar(strNew, init, i));
@@ -30,9 +30,9 @@ public class TestClass {
   }
 
   public static String insertChar(String sh, char init, int i) {
-      String begin = sh.substring(0, i);
+    String begin = sh.substring(0, i);
     String end = sh.substring(i);
-            return begin + init + end;
+    return begin + init + end;
   }
 
   public static void allPermAgain(String s) {
