@@ -16,7 +16,14 @@ public class FormatCheck {
   }
 
   public static void aBetterFormatting() {
-    System.out.println("in IDE " + "this is not so cool ");
+    System.out.println("this is S0 cool ");
+  }
+
+  public void thisIsAnotherMethod(String sss, int i[]) {
+
+    System.out.println("this is S0 cool ");
+    System.out.println(sss);
+    System.out.println("length of" + i.length);
   }
   /*******
    *
@@ -26,12 +33,6 @@ public class FormatCheck {
    *
    *
    * a  valid comment
-   *
-   *
-   *
-   *
-   *
-   ***
    */
   public static void addingNewMethod() {}
 }
