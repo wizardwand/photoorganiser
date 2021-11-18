@@ -35,7 +35,7 @@ If Java 8 is not installed.
 
 # Problem Statement
 
-I had 310 GB of Photos and videos, in multiple folders and multiple locations .
+I had 551 GB of Photos and videos, in multiple folders and multiple locations .
 
 Wanted to club them in following order 
 
