@@ -22,7 +22,7 @@ If you have java 8 and above setup on your machine following command will work.
 
 ```
 cd /execute/
-java -jar photo-organizer.jar -s "C:\tmp\test" -d "C:\tmp\photos"
+java -jar photo-organizer.jar -s "C:\nerd\allPhoto" -d "C:\nerd\sorted"
 
 -s is the source folder
 -d is the destination folder where all the photos and videos will be moved .
