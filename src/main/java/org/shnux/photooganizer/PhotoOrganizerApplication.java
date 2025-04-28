@@ -36,6 +36,8 @@ public class PhotoOrganizerApplication {
 
   private static final Logger LOG = LogManager.getLogger(PhotoOrganizerApplication.class);
   private static final List<String> ignoreFiles = List.of("aae", "pdf");
+  private static long numberOfFiles = 0;
+  private static long totalSize = 0;
 
   /**
    * Create folder year->Month
@@ -48,6 +50,7 @@ public class PhotoOrganizerApplication {
     Args.parseOrExit(Options.class, args);
     if (Objects.nonNull(Options.source) && Objects.nonNull(Options.destination)) {
       readPhotos(Options.source);
+      printAnalysis();
     } else {
       LOG.info("Please provide source and destination");
     }
@@ -83,15 +86,24 @@ public class PhotoOrganizerApplication {
     }
   }
 
+  private static void printAnalysis() {
+
+    double kilobytes = (double) totalSize / 1024;
+    double megabytes = kilobytes / 1024;
+    double gigabytes = megabytes / 1024;
+    LOG.error("Total {} Files Processed", numberOfFiles);
+    LOG.error("Total size of {} GB Files Processed", gigabytes);
+  }
+
   private static void moveFilesInThisPath(String fileName, String filePath) {
     LOG.info("fileName = {}", filePath);
 
     try {
       File file = new File(filePath);
       final String yearMonth = extractYearMonth(file);
-      LOG.error(
-        "Destination = {}",
-        Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
+      LOG.info(
+          "Destination = {}",
+          Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
       moveFileToDirectory(
           filePath, Options.destination + PATH_SEPARATOR + yearMonth + PATH_SEPARATOR + fileName);
     } catch (SkippedException e) {
@@ -121,6 +133,8 @@ public class PhotoOrganizerApplication {
       case "png":
       case "dng":
       case "gif":
+      case "avi":
+      case "3gp":
         return extractFromMetadata(ImageMetadataReader.readMetadata(file));
       default:
         LOG.warn("Unsupported file type: {}. Using default 'unknown'", extension);
@@ -169,6 +183,7 @@ public class PhotoOrganizerApplication {
 
 
   private static String getFileExtension(File file) {
+    totalSize += file.length();
     String name = file.getName();
     int lastDot = name.lastIndexOf('.');
     return (lastDot == -1) ? "" : name.substring(lastDot + 1).toLowerCase();
@@ -186,7 +201,7 @@ public class PhotoOrganizerApplication {
       // rename or move a file to other path
       // if target exists, throws FileAlreadyExistsException
       Files.move(source, target);
-
+      numberOfFiles++;
       // if target exists, replace it.
       //      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
 
