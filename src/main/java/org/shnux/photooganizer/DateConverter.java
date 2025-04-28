@@ -33,6 +33,8 @@ public class DateConverter {
     new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.ROOT),
     new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH),
     new SimpleDateFormat("EEE MMM dd HH:mm:ss XXX yyyy", Locale.ENGLISH),
+      new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH),
+      new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH),
     new SimpleDateFormat("yyyy-MM-dd", Locale.ROOT),
     new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX"),
     new SimpleDateFormat("yyyy:MM:dd", Locale.ROOT)
